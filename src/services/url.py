@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import Generic, Optional, Type, TypeVar
-
+from typing import Generic, Type, TypeVar
+import time
 import pyshorteners
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -32,10 +31,24 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self._model = model
 
+    async def update_usage_count(self, db: AsyncSession, url_id: int, counter: int):
+        logger.info(f'update usage_count for id: {url_id}')
+        stm = update(self._model).where(self._model.id == url_id).values(usage_count=counter+1)
+        await db.execute(stm)
+        await db.commit()
+
     async def get(self, db: AsyncSession, url_id: int) -> ModelType | None:
         logger.info(f'get function get: {url_id}')
         statement = select(self._model).where(self._model.id == url_id)
         obj = await db.scalar(statement=statement)
+        return obj
+
+    async def get_redirect(self, db: AsyncSession, url_id: int) -> ModelType | None:
+        logger.info(f'get function get: {url_id}')
+        statement = select(self._model).where(self._model.id == url_id)
+        obj = await db.scalar(statement=statement)
+        counter = obj.usage_count
+        await self.update_usage_count(db=db, url_id=url_id, counter=counter)
         return obj
 
     async def update(self, *args, **kwargs):
@@ -68,7 +81,11 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         await db.commit()
         return db_obj
 
-    # async def get_status(self, db: AsyncSession, url_id: int) -> ModelType | None:
-    #     url = await self.get_item(db, url_id)
-    #     if not url.private:
-    #         return url.usage_count
+    async def get_ping_db(self, db: AsyncSession) -> dict | None:
+        start_time = time.time()
+        statement = select(self._model)
+        await db.execute(statement=statement)
+        ping = time.time() - start_time
+        return {
+            'db': '{:.4f}'.format(ping),
+        }

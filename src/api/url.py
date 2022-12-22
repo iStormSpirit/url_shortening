@@ -10,6 +10,13 @@ from core.config import logger
 router = APIRouter()
 
 
+@router.get('/ping', tags=['info'])
+async def check_status_db(db: AsyncSession = Depends(get_session)):
+    result = await urls_crud.get_ping_db(db=db)
+    logger.info(f'ping for select query in db: {result}')
+    return result
+
+
 @router.post('/urls', response_model=url_schema.UrlShort, status_code=status.HTTP_201_CREATED)
 async def create_url(*, db: AsyncSession = Depends(get_session), url_in: url_schema.UrlCreate) -> any:
     logger.info(f'router create_url: {url_in}')
@@ -20,7 +27,7 @@ async def create_url(*, db: AsyncSession = Depends(get_session), url_in: url_sch
 @router.get('/{url_id}', response_class=RedirectResponse)
 async def get_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
     logger.info(f'router create_url: {url_id}')
-    url = await urls_crud.get(db=db, url_id=url_id)
+    url = await urls_crud.get_redirect(db=db, url_id=url_id)
     logger.info(f'router create_url: {url}')
     if not url:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
@@ -36,11 +43,20 @@ async def delete_url(*, db: AsyncSession = Depends(get_session), url_id: int) ->
     return url
 
 
-# @router.get('/urls/{url_id}/status')
-# async def get_status(*, db: AsyncSession = Depends(get_session), url_id) -> any:
-#     url_status = await urls_crud.get_status(db=db, url_id=url_id)
-#     if not url_status:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
-#         )
-#     return ORJSONResponse(url_status)
+@router.get('/{url_id}/status', response_model=url_schema.UrlStatus)
+async def get_url_status(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
+    url_status = await urls_crud.get(db=db, url_id=url_id)
+    if not url_status:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    return url_status
+
+
+@router.get('/get_full_info_url/{url_id}', response_model=url_schema.UrlInDBase, status_code=status.HTTP_200_OK,
+            tags=['info'])
+async def get_full_info_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
+    logger.info(f'router create_url: {url_id}')
+    url = await urls_crud.get(db=db, url_id=url_id)
+    logger.info(f'router create_url: {url}')
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
+    return url

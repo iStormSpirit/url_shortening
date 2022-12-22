@@ -28,18 +28,29 @@ class UrlOriginal(UrlId):
     class Config:
         orm_mode = True
 
-# class UrlInDBase(UrlBase):
-#     id: int
-#     short_url: str
-#     # original_url: str
-#     # usage_count: int
-#     created_at: datetime
-#
-#     # public: bool = True
-#     # owner: str | None
-#
-#     class Config:
-#         orm_mode = True
+
+class UrlStatus(UrlId):
+    short_url: str
+    original_url: str
+    usage_count: int
+
+    class Config:
+        orm_mode = True
+
+
+class UrlInDBase(UrlBase):
+    id: int
+    short_url: str
+    original_url: str
+    usage_count: int
+    created_at: datetime
+
+    # private: bool
+    # public: bool = True
+    # owner: str | None
+
+    class Config:
+        orm_mode = True
 #
 #
 # class Url(UrlInDBase):
