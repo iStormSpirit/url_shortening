@@ -14,3 +14,10 @@ class ShortUrl(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     # is_private = Column(Boolean, default=False)
     is_archived = Column(Boolean, default=False)
+
+
+# class User(Base):
+#     __tablename__ = 'users'
+#     id = Column(Integer, primary_key=True)
+#     username = Column(String(50), primary_key=True)
+#     password = Column(String(100))

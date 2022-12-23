@@ -8,7 +8,7 @@ class UrlBase(BaseModel):
 
 
 class UrlCreate(BaseModel):
-    original_url: str
+    original_url: HttpUrl
 
 
 class UrlId(BaseModel):
@@ -16,22 +16,22 @@ class UrlId(BaseModel):
 
 
 class UrlShort(UrlId):
-    short_url: str
+    short_url: HttpUrl
 
     class Config:
         orm_mode = True
 
 
 class UrlOriginal(UrlId):
-    original_url: str
+    original_url: HttpUrl
 
     class Config:
         orm_mode = True
 
 
 class UrlStatus(UrlId):
-    short_url: str
-    original_url: str
+    short_url: HttpUrl
+    original_url: HttpUrl
     usage_count: int
 
     class Config:
@@ -40,8 +40,8 @@ class UrlStatus(UrlId):
 
 class UrlInDBase(UrlBase):
     id: int
-    short_url: str
-    original_url: str
+    short_url: HttpUrl
+    original_url: HttpUrl
     usage_count: int
     created_at: datetime
     is_archived: bool
