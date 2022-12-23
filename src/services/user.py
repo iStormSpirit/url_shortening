@@ -2,7 +2,7 @@ from typing import Generic, Type, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import logger
@@ -62,3 +62,9 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         await db.delete(db_obj)
         await db.commit()
         return db_obj
+
+    async def get_username(self, db: AsyncSession, username: str) -> ModelType | None:
+        statement = select(self._model).where(self._model.username == username)
+        results = await db.execute(statement=statement)
+        logger.info(f'get user by username {username}')
+        return results.scalar_one_or_none()

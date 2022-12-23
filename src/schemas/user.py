@@ -28,5 +28,10 @@ class User(UserInDBBase):
     pass
 
 
-# class UserInDB(UserInDBBase):
-#     password: str
+class UserInDB(UserInDBBase):
+    password: str
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str

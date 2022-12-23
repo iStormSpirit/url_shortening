@@ -6,5 +6,3 @@ from .user import router as router_user
 api_router = APIRouter()
 api_router.include_router(router_url)
 api_router.include_router(router_user)
-
-
