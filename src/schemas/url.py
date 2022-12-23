@@ -52,5 +52,14 @@ class UrlInDBase(UrlBase):
     class Config:
         orm_mode = True
 
-# class Url(UrlInDBase):
-#     pass
+
+# class UrlByUser(UrlInDBase):
+#     id: int
+#     short_url: HttpUrl
+#     original_url: HttpUrl
+#     usage_count: int
+#     created_at: datetime
+#     is_private: bool
+#
+#     class Config:
+#         orm_mode = True

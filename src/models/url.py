@@ -16,8 +16,8 @@ class ShortUrl(Base):
     is_archived = Column(Boolean, default=False)
 
 
-# class User(Base):
-#     __tablename__ = 'users'
-#     id = Column(Integer, primary_key=True)
-#     username = Column(String(50), primary_key=True)
-#     password = Column(String(100))
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, index=True)
+    password = Column(String(100))
