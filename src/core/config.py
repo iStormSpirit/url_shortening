@@ -1,6 +1,5 @@
 import os
 from logging import config
-from logging import config as logging_config
 from logging import getLogger
 
 from pydantic import BaseSettings, PostgresDsn
@@ -14,12 +13,11 @@ class AppSettings(BaseSettings):
 
     class Config:
         env_file = '.env'
+        BLOCKED_IPS = []
 
 
 app_settings = AppSettings()
 # Применяем настройки логирования
-# logging_config.dictConfig(LOGGING)
-
 config.dictConfig(LOGGING)
 logger = getLogger(__name__)
 

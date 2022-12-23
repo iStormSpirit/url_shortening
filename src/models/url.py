@@ -11,7 +11,6 @@ class ShortUrl(Base):
     short_url = Column(String)
     original_url = Column(String)
     usage_count = Column(Integer, default=0)
-    # public = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    # private = Column(Boolean, default=False)
+    # is_private = Column(Boolean, default=False)
     is_archived = Column(Boolean, default=False)

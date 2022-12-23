@@ -46,13 +46,12 @@ class UrlInDBase(UrlBase):
     created_at: datetime
     is_archived: bool
 
-    # private: bool
-    # public: bool = True
+    # is_private: bool
     # owner: str | None
 
     class Config:
         orm_mode = True
-#
-#
+
+
 # class Url(UrlInDBase):
 #     pass

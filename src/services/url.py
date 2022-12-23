@@ -1,5 +1,6 @@
-from typing import Generic, Type, TypeVar
 import time
+from typing import Generic, Type, TypeVar
+
 import pyshorteners
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -41,6 +42,10 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         logger.info(f'get function get: {url_id}')
         statement = select(self._model).where(self._model.id == url_id)
         obj = await db.scalar(statement=statement)
+        if not obj:
+            return None
+        if obj.is_archived is True:
+            return 410
         return obj
 
     async def get_redirect(self, db: AsyncSession, url_id: int) -> ModelType | None:
@@ -97,11 +102,8 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
     async def archived(self, db: AsyncSession, url_id: int) -> ModelType | None:
         db_obj = await self.get(db=db, url_id=url_id)
         stm = update(self._model).where(self._model.id == url_id).values(is_archived=True)
+        logger.info(f'archived function archived: {db_obj} with id {url_id}')
         await db.execute(stm)
         await db.commit()
         if not db_obj:
             return None
-        logger.info(f'archived function archived: {db_obj} with id {url_id}')
-        # await db.delete(db_obj)
-        # await db.commit()
-        # return db_obj

@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import ORJSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.config import logger
 from db.db import get_session
 from schemas import url as url_schema
 from services.base import urls_crud
-from core.config import logger
 
 router = APIRouter()
 
@@ -56,10 +56,12 @@ async def delete_url(*, db: AsyncSession = Depends(get_session), url_id: int) ->
 
 @router.get('/{url_id}/status', response_model=url_schema.UrlStatus)
 async def get_url_status(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
-    url_status = await urls_crud.get(db=db, url_id=url_id)
-    if not url_status:
+    url = await urls_crud.get(db=db, url_id=url_id)
+    if not url:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
-    return url_status
+    if url == 410:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail='Gone')
+    return url
 
 
 @router.get('/get_full_info_url/{url_id}', response_model=url_schema.UrlInDBase, status_code=status.HTTP_200_OK,
@@ -70,4 +72,6 @@ async def get_full_info_url(*, db: AsyncSession = Depends(get_session), url_id: 
     logger.info(f'router create_url: {url}')
     if not url:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
+    if url == 410:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail='Gone')
     return url
