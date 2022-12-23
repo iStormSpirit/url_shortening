@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 
 class UrlBase(BaseModel):
@@ -51,7 +51,6 @@ class UrlInDBase(UrlBase):
 
     class Config:
         orm_mode = True
-
 
 # class Url(UrlInDBase):
 #     pass

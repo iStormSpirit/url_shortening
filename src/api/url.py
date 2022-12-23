@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import ORJSONResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import logger
@@ -15,6 +15,22 @@ async def check_status_db(db: AsyncSession = Depends(get_session)):
     result = await urls_crud.get_ping_db(db=db)
     logger.info(f'ping for select query in db: {result}')
     return result
+
+
+@router.post('/urls22', response_model=list[url_schema.UrlShort])
+async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: list[str]) -> any:
+    """
+    "https://fastapi.tiangolo.com/tutorial/path-params/",
+    "https://fastapi.tiangolo.com/advanced/additional-responses/",
+    "https://fastapi.tiangolo.com/tutorial/schema-extra-example/"
+    """
+    logger.info(f'router create_url: {url_in}')
+    answer = []
+    for url in url_in:
+        url = await urls_crud.create_list(db=db, obj_url=url)
+        logger.info(f'url ---: {url}')
+        answer.append(url)
+    return answer
 
 
 @router.post('/urls', response_model=url_schema.UrlShort, status_code=status.HTTP_201_CREATED)

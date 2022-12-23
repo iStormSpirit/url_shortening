@@ -34,7 +34,7 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
 
     async def update_usage_count(self, db: AsyncSession, url_id: int, counter: int):
         logger.info(f'update usage_count for id: {url_id}')
-        stm = update(self._model).where(self._model.id == url_id).values(usage_count=counter+1)
+        stm = update(self._model).where(self._model.id == url_id).values(usage_count=counter + 1)
         await db.execute(stm)
         await db.commit()
 
@@ -77,6 +77,18 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         obj_in_data['short_url'] = self.shortener(obj_in_data['original_url'])
         db_obj = self._model(**obj_in_data)
         db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
+    async def create_list(self, db: AsyncSession, obj_url: str):
+        obj_in_data = dict()
+        logger.info(f'create22 function get: {obj_in_data}')
+        obj_in_data['original_url'] = obj_url
+        obj_in_data['short_url'] = self.shortener(obj_url)
+        db_obj = self._model(**obj_in_data)
+        db.add(db_obj)
+        logger.info(f'create22 function created: {db_obj}')
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
