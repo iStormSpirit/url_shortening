@@ -47,6 +47,10 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         logger.info(f'get function get: {url_id}')
         statement = select(self._model).where(self._model.id == url_id)
         obj = await db.scalar(statement=statement)
+        if not obj:
+            return None
+        if obj.is_archived is True:
+            return 410
         counter = obj.usage_count
         await self.update_usage_count(db=db, url_id=url_id, counter=counter)
         return obj
@@ -89,3 +93,15 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         return {
             'db': '{:.4f}'.format(ping),
         }
+
+    async def archived(self, db: AsyncSession, url_id: int) -> ModelType | None:
+        db_obj = await self.get(db=db, url_id=url_id)
+        stm = update(self._model).where(self._model.id == url_id).values(is_archived=True)
+        await db.execute(stm)
+        await db.commit()
+        if not db_obj:
+            return None
+        logger.info(f'archived function archived: {db_obj} with id {url_id}')
+        # await db.delete(db_obj)
+        # await db.commit()
+        # return db_obj

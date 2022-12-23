@@ -31,10 +31,21 @@ async def get_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> an
     logger.info(f'router create_url: {url}')
     if not url:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
+    if url == 410:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail='Gone')
     return RedirectResponse(url=url.original_url)
 
 
 @router.delete('/{url_id}/delete', status_code=status.HTTP_200_OK)
+async def archived_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
+    url = await urls_crud.archived(db=db, url_id=url_id)
+    logger.info(f'router delete_url: {url_id}')
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
+    return url
+
+
+@router.delete('/{url_id}/real_delete', status_code=status.HTTP_200_OK)
 async def delete_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
     url = await urls_crud.delete(db=db, url_id=url_id)
     logger.info(f'router delete_url: {url_id}')

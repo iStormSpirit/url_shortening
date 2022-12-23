@@ -44,6 +44,7 @@ class UrlInDBase(UrlBase):
     original_url: str
     usage_count: int
     created_at: datetime
+    is_archived: bool
 
     # private: bool
     # public: bool = True
