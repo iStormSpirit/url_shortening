@@ -71,21 +71,23 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         logger.info(f'shortener function return: {short_url}')
         return short_url
 
-    async def create(self, db: AsyncSession, obj_url: CreateSchemaType) -> ModelType:
+    async def create(self, db: AsyncSession, obj_url: CreateSchemaType, user: int = None) -> ModelType:
         obj_in_data = jsonable_encoder(obj_url)
         logger.info(f'create function created: {obj_in_data}')
         obj_in_data['short_url'] = self.shortener(obj_in_data['original_url'])
+        obj_in_data['author_id'] = user
         db_obj = self._model(**obj_in_data)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
 
-    async def create_list(self, db: AsyncSession, obj_url: str):
+    async def create_list(self, db: AsyncSession, obj_url: str, user: int = None):
         obj_in_data = dict()
-        logger.info(f'create22 function get: {obj_in_data}')
+        logger.info(f'create_list function get: {obj_in_data}')
         obj_in_data['original_url'] = obj_url
         obj_in_data['short_url'] = self.shortener(obj_url)
+        obj_in_data['author_id'] = user
         db_obj = self._model(**obj_in_data)
         db.add(db_obj)
         logger.info(f'create22 function created: {db_obj}')

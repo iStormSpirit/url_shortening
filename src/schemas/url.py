@@ -47,7 +47,7 @@ class UrlInDBase(UrlBase):
     is_archived: bool
 
     # is_private: bool
-    # owner: str | None
+    author_id: int | None
 
     class Config:
         orm_mode = True

@@ -1,8 +1,17 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 from db.db import Base
+
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, index=True)
+    password = Column(String(100))
+    urls_list = relationship("ShortUrl")
 
 
 class ShortUrl(Base):
@@ -14,13 +23,4 @@ class ShortUrl(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     # is_private = Column(Boolean, default=False)
     is_archived = Column(Boolean, default=False)
-
-    # owner = Column(ForeignKey('users.id'))
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(100), unique=True, index=True)
-    password = Column(String(100))
-
-    # urls = Column(ForeignKey('urls.id', ondelete='CASCADE'))
+    author_id = Column(Integer, ForeignKey('users.id'), nullable=True)
