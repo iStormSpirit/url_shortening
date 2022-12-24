@@ -5,9 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.config import logger
 from db.db import get_session
 from schemas import url as url_schema
+from schemas import user as user_schema
 from services.base import urls_crud
 from services.security import get_current_user
-from schemas import user as user_schema
 
 router = APIRouter()
 
