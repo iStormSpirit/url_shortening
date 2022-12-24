@@ -71,29 +71,39 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         logger.info(f'shortener function return: {short_url}')
         return short_url
 
-    async def create(self, db: AsyncSession, obj_url: CreateSchemaType, user: int = None) -> ModelType:
+    async def create(self, db: AsyncSession, obj_url: CreateSchemaType,
+                     user: int = None, is_private: bool = False) -> ModelType:
         obj_in_data = jsonable_encoder(obj_url)
         logger.info(f'create function created: {obj_in_data}')
         obj_in_data['short_url'] = self.shortener(obj_in_data['original_url'])
         obj_in_data['author_id'] = user
+        obj_in_data['is_private'] = is_private
         db_obj = self._model(**obj_in_data)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
 
-    async def create_list(self, db: AsyncSession, obj_url: str, user: int = None):
+    async def create_list(self, db: AsyncSession, obj_url: str, user: int = None, is_private: bool = False):
         obj_in_data = dict()
         logger.info(f'create_list function get: {obj_in_data}')
         obj_in_data['original_url'] = obj_url
         obj_in_data['short_url'] = self.shortener(obj_url)
         obj_in_data['author_id'] = user
+        obj_in_data['is_private'] = is_private
         db_obj = self._model(**obj_in_data)
         db.add(db_obj)
         logger.info(f'create22 function created: {db_obj}')
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
+
+    async def update_status(self, db: AsyncSession, url_id: int, status: bool):
+        logger.info(f'update is_private for id: {url_id}')
+        stm = update(self._model).where(self._model.id == url_id).values(is_private=status)
+        await db.execute(stm)
+        await db.commit()
+        return self.get(db, url_id)
 
     async def delete(self, db: AsyncSession, url_id: int) -> ModelType | None:
         db_obj = await self.get(db=db, url_id=url_id)

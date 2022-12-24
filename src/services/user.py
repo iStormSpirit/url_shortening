@@ -42,9 +42,8 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         hash_password = get_password_hash(obj_in.dict().pop('password'))
         obj_in_data = jsonable_encoder(obj_in)
         obj_in_data['password'] = hash_password
-        logger.info(f'hashed password for {obj_in_data}')
         db_obj = self._model(**obj_in_data)
-        logger.info(f'user created {obj_in_data}')
+        logger.info(f'user created')
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)

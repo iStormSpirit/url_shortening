@@ -45,8 +45,7 @@ class UrlInDBase(UrlBase):
     usage_count: int
     created_at: datetime
     is_archived: bool
-
-    # is_private: bool
+    is_private: bool
     author_id: int | None
 
     class Config:

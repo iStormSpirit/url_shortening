@@ -21,6 +21,6 @@ class ShortUrl(Base):
     original_url = Column(String)
     usage_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
-    # is_private = Column(Boolean, default=False)
+    is_private = Column(Boolean, default=False)
     is_archived = Column(Boolean, default=False)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=True)

@@ -21,9 +21,9 @@ async def create_url(*, db: AsyncSession = Depends(get_session), url_in: url_sch
 
 @router.post('/urls_auth', response_model=url_schema.UrlShort, status_code=status.HTTP_201_CREATED, tags=['urls'])
 async def create_url(*, db: AsyncSession = Depends(get_session), url_in: url_schema.UrlCreate,
-                     current_user: user_schema.User = Depends(get_current_user)) -> any:
+                     current_user: user_schema.User = Depends(get_current_user), is_private: bool = False) -> any:
     logger.info(f'router create_url auth: {url_in}')
-    url = await urls_crud.create(db=db, obj_url=url_in, user=current_user.id)
+    url = await urls_crud.create(db=db, obj_url=url_in, user=current_user.id, is_private=is_private)
     return url
 
 
@@ -39,13 +39,28 @@ async def get_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> an
     return RedirectResponse(url=url.original_url)
 
 
-@router.get('/{url_id}/status', response_model=url_schema.UrlStatus, tags=['urls'])
+@router.get('/{url_id}/status', response_model=url_schema.UrlInDBase, tags=['urls'])
 async def get_url_status(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
     url = await urls_crud.get(db=db, url_id=url_id)
     if not url:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     if url == 410:
         raise HTTPException(status_code=status.HTTP_410_GONE, detail='Gone')
+    return url
+
+
+@router.put('/{url_id}/status_change', response_model=url_schema.UrlInDBase, tags=['extra'])
+async def get_url_private_status(*, db: AsyncSession = Depends(get_session), url_id: int,
+                                 current_user: user_schema.User = Depends(get_current_user),
+                                 is_private: bool = False) -> any:
+    url = await urls_crud.get(db=db, url_id=url_id)
+    if current_user.id != url.author_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    if url == 410:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail='Gone')
+    await urls_crud.update_status(db=db, url_id=url_id, status=is_private)
     return url
 
 
@@ -74,7 +89,8 @@ async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: li
 
 @router.post('/urls-auth-list', response_model=list[url_schema.UrlShort], tags=['extra'])
 async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: list[str],
-                          current_user: user_schema.User = Depends(get_current_user)) -> any:
+                          current_user: user_schema.User = Depends(get_current_user),
+                          is_private: bool = False) -> any:
     """
     "https://fastapi.tiangolo.com/tutorial/path-params/",
     "https://fastapi.tiangolo.com/advanced/additional-responses/",
@@ -83,7 +99,7 @@ async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: li
     logger.info(f'router create_url: {url_in}')
     answer = []
     for url in url_in:
-        url = await urls_crud.create_list(db=db, obj_url=url, user=current_user.id)
+        url = await urls_crud.create_list(db=db, obj_url=url, user=current_user.id, is_private=is_private)
         logger.info(f'url ---: {url}')
         answer.append(url)
     return answer
