@@ -103,7 +103,6 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         stm = update(self._model).where(self._model.id == url_id).values(is_private=status)
         await db.execute(stm)
         await db.commit()
-        return self.get(db, url_id)
 
     async def delete(self, db: AsyncSession, url_id: int) -> ModelType | None:
         db_obj = await self.get(db=db, url_id=url_id)
@@ -131,3 +130,9 @@ class RepositoryDB(Repository, Generic[ModelType, CreateSchemaType]):
         await db.commit()
         if not db_obj:
             return None
+
+    async def get_all_urls(self, db: AsyncSession, author_id: int) -> list[ModelType] | None:
+        logger.info(f'get list ulr by user id {author_id}')
+        statement = select(self._model).where(self._model.author_id == int(author_id))
+        results = await db.execute(statement=statement)
+        return results.scalars().all()
