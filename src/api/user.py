@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/user/me", response_model=user_schema.User, tags=['user auth'])
-async def read_users_me(current_user: user_schema.User = Depends(get_current_user)):
+async def get_self(current_user: user_schema.User = Depends(get_current_user)):
     return current_user
 
 
