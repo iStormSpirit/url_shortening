@@ -28,7 +28,7 @@ async def create_url(*, db: AsyncSession = Depends(get_session), url_in: url_sch
 
 
 @router.get('/{url_id}', response_class=RedirectResponse, tags=['urls'])
-async def get_url(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
+async def url_value_increase(*, db: AsyncSession = Depends(get_session), url_id: int) -> any:
     logger.info(f'router create_url: {url_id}')
     url = await urls_crud.get_redirect(db=db, url_id=url_id)
     logger.info(f'router create_url: {url}')
@@ -73,11 +73,6 @@ async def check_status_db(db: AsyncSession = Depends(get_session)):
 
 @router.post('/urls-list', response_model=list[url_schema.UrlShort], tags=['extra'])
 async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: list[str]) -> any:
-    """
-    "https://fastapi.tiangolo.com/tutorial/path-params/",
-    "https://fastapi.tiangolo.com/advanced/additional-responses/",
-    "https://fastapi.tiangolo.com/tutorial/schema-extra-example/"
-    """
     logger.info(f'router create_url: {url_in}')
     answer = []
     for url in url_in:
@@ -91,11 +86,6 @@ async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: li
 async def create_list_url(*, db: AsyncSession = Depends(get_session), url_in: list[str],
                           current_user: user_schema.User = Depends(get_current_user),
                           is_private: bool = False) -> any:
-    """
-    "https://fastapi.tiangolo.com/tutorial/path-params/",
-    "https://fastapi.tiangolo.com/advanced/additional-responses/",
-    "https://fastapi.tiangolo.com/tutorial/schema-extra-example/"
-    """
     logger.info(f'router create_url: {url_in}')
     answer = []
     for url in url_in:
